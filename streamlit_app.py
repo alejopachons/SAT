@@ -7,7 +7,7 @@ import time
 openai.api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
 
 # Initialize assistant
-assistant_id = "asst_fRS1bZADCW3RQjy02u6CfYGI"
+assistant_id = "ASSISTANT_ID"
 openai_client = openai.Client(api_key=openai.api_key)
 assistant = openai_client.beta.assistants.retrieve(assistant_id)
 
