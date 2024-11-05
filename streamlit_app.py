@@ -70,7 +70,8 @@ if selected_tab == "Reportes":
             df = pd.DataFrame(records)
             st.write("Data from Airtable:")
             st.metric(label="Cantidad de preguntas", value=df.shape[0])
-            st.dataframe(df, use_container_width=True)  # Muestra el DataFrame en Streamlit
+            st.dataframe(df.sort_values(by=['Fecha'], ascending=False).reset_index(drop=True).style.hide_index(), use_container_width=True)
+
 
             st.header("Preguntas por fecha", divider="gray")
 
