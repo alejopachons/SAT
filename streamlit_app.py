@@ -73,7 +73,7 @@ if selected_tab == "Reportes":
             col1.metric(label="Cantidad de sesiones", value=df['session_id'].nunique())
             col2.metric(label="Cantidad de preguntas", value=df.shape[0])
 
-            st.dataframe(df[['Preguntas', 'Fecha']].sort_values(by=['Fecha'], ascending=False).reset_index(drop=True), use_container_width=True)
+            st.dataframe(df[['Preguntas', 'Fecha']].sort_values(by=['Fecha'], ascending=False).reset_index(drop=True), use_container_width=True, hide_index=True,)
 
             st.header("Sesiones y Preguntas por fecha", divider="gray")
 
