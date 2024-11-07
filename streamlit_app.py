@@ -70,9 +70,8 @@ if selected_tab == "Reportes":
             # Crear dos columnas para organizar las métricas lado a lado
             col1, col2 = st.columns([1, 1])  # Las proporciones pueden ajustarse para modificar el tamaño de cada columna
 
-            col1.metric(label="Cantidad de preguntas", value=df.shape[0])
-
-            col2.metric(label="Cantidad de sesiones", value=df['session_id'].nunique())
+            col1.metric(label="Cantidad de sesiones", value=df['session_id'].nunique())
+            col2.metric(label="Cantidad de preguntas", value=df.shape[0])
 
             st.dataframe(df[['Preguntas', 'Fecha']].sort_values(by=['Fecha'], ascending=False).reset_index(drop=True), use_container_width=True)
 
