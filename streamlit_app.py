@@ -67,14 +67,26 @@ if selected_tab == "Reportes":
         records = [record['fields'] for record in data.get('records', [])]
         if records:
             df = pd.DataFrame(records)
-            st.metric(label="Cantidad de preguntas", value=df.shape[0])
-            st.metric(label="Cantidad de sesiones", value=df['session_id'].nunique())
+            # Crear dos columnas para organizar las métricas lado a lado
+            col1, col2 = st.columns([1, 1])  # Las proporciones pueden ajustarse para modificar el tamaño de cada columna
+
+            col1.metric(label="Cantidad de preguntas", value=df.shape[0])
+
+            col2.metric(label="Cantidad de sesiones", value=df['session_id'].nunique())
+
             st.dataframe(df[['Preguntas', 'Fecha']].sort_values(by=['Fecha'], ascending=False).reset_index(drop=True), use_container_width=True)
 
-            st.header("Preguntas por fecha", divider="gray")
+            st.header("Sesiones y Preguntas por fecha", divider="gray")
 
-            df_fecha = df.groupby("Fecha").size().reset_index(name="Cantidad de Preguntas")
-            st.bar_chart(df_fecha, x="Fecha", y="Cantidad de Preguntas")
+            # Calcular la cantidad de preguntas y sesiones por fecha
+            df_fecha_preguntas = df.groupby("Fecha").size().reset_index(name="Cantidad de Preguntas")
+            df_fecha_sesiones = df.groupby("Fecha")['session_id'].nunique().reset_index(name="Cantidad de Sesiones")
+
+            # Unir ambos DataFrames en uno solo
+            df_combined = pd.merge(df_fecha_preguntas, df_fecha_sesiones, on="Fecha")
+
+            # Graficar ambas métricas en un solo gráfico de líneas
+            st.line_chart(df_combined.set_index("Fecha"))
 
         else:
             st.warning("No records found in Airtable.")
