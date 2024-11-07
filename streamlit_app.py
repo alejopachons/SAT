@@ -18,7 +18,8 @@ assistant = openai_client.beta.assistants.retrieve(assistant_id)
 # Sidebar configuration for OpenAI API Key and Reportes
 with st.sidebar:
     st.title('🤖💬 Sofía Chatbot')
-    selected_tab = st.radio("Select an option:", ["Chat", "Reportes"])
+    # selected_tab = st.radio("Select an option:", ["Chat", "Reportes"])
+    selected_tab = st.radio("Menú:",["Sofía Chat", "Reportes"])
     
     # if openai.api_key:
     #     st.success('OPENAI API key is set!', icon='✅')
@@ -57,7 +58,7 @@ def enviar_mensaje_a_airtable(contenido):
 
 # Airtable integration code (Reportes tab)
 if selected_tab == "Reportes":
-    st.subheader("Airtable Reportes")
+    st.subheader("Reportes")
     url = f"https://api.airtable.com/v0/{airtable_base_id}/{airtable_table_name}"
     
     response = requests.get(url, headers=headers)
@@ -68,7 +69,7 @@ if selected_tab == "Reportes":
         records = [record['fields'] for record in data.get('records', [])]
         if records:
             df = pd.DataFrame(records)
-            st.write("Data from Airtable:")
+            # st.write("Reportes:")
             st.metric(label="Cantidad de preguntas", value=df.shape[0])
             st.dataframe(df.sort_values(by=['Fecha'], ascending=False).reset_index(drop=True), use_container_width=True)
 
@@ -85,7 +86,7 @@ if selected_tab == "Reportes":
         st.error(f"Failed to retrieve data: {response.status_code}")
 
 # Initialize message history with a welcoming message if not already set
-if selected_tab == "Chat":
+if selected_tab == "Sofía Chat":
     if "messages" not in st.session_state:
         st.session_state.messages = [
             {"role": "assistant", "content": "Hola! ¿cómo puedo ayudarte hoy?"}
