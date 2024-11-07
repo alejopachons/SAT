@@ -20,14 +20,14 @@ with st.sidebar:
     st.title('🤖💬 Sofía Chatbot')
     selected_tab = st.radio("Select an option:", ["Chat", "Reportes"])
     
-    if openai.api_key:
-        st.success('OPENAI API key is set!', icon='✅')
-    else:
-        openai.api_key = st.text_input('Enter OpenAI API token:', type='password')
-        if openai.api_key.startswith('sk-') and len(openai.api_key) == 51:
-            st.success('Ready to chat!', icon='👉')
-        else:
-            st.warning('Please enter valid credentials!', icon='⚠️')
+    # if openai.api_key:
+    #     st.success('OPENAI API key is set!', icon='✅')
+    # else:
+    #     openai.api_key = st.text_input('Enter OpenAI API token:', type='password')
+    #     if openai.api_key.startswith('sk-') and len(openai.api_key) == 51:
+    #         st.success('Ready to chat!', icon='👉')
+    #     else:
+    #         st.warning('Please enter valid credentials!', icon='⚠️')
 
 # Airtable configuration
 airtable_api_key = st.secrets.get("AIRTABLE_API_KEY")  # Replace name when setting secrets
@@ -97,7 +97,7 @@ if selected_tab == "Chat":
             st.markdown(message["content"])
 
     # Handle user input
-    if prompt := st.chat_input("What's on your mind?"):
+    if prompt := st.chat_input("¿En qué puedo ayudarte?"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         
         # Enviar el mensaje a Airtable
