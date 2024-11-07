@@ -5,7 +5,7 @@ import requests
 import pandas as pd
 from datetime import datetime  # Importa datetime para obtener la fecha actual
 import time
-
+import uuid  # Para generar un session_id único
 
 # Set up the OpenAI client
 openai.api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
@@ -18,17 +18,7 @@ assistant = openai_client.beta.assistants.retrieve(assistant_id)
 # Sidebar configuration for OpenAI API Key and Reportes
 with st.sidebar:
     st.title('🤖💬 Sofía Chatbot')
-    # selected_tab = st.radio("Select an option:", ["Chat", "Reportes"])
-    selected_tab = st.radio("Menú:",["Sofía Chat", "Reportes"])
-    
-    # if openai.api_key:
-    #     st.success('OPENAI API key is set!', icon='✅')
-    # else:
-    #     openai.api_key = st.text_input('Enter OpenAI API token:', type='password')
-    #     if openai.api_key.startswith('sk-') and len(openai.api_key) == 51:
-    #         st.success('Ready to chat!', icon='👉')
-    #     else:
-    #         st.warning('Please enter valid credentials!', icon='⚠️')
+    selected_tab = st.radio("Menú:", ["Sofía Chat", "Reportes"])
 
 # Airtable configuration
 airtable_api_key = st.secrets.get("AIRTABLE_API_KEY")  # Replace name when setting secrets
@@ -40,14 +30,22 @@ headers = {
     "Content-Type": "application/json"
 }
 
-def enviar_mensaje_a_airtable(contenido):
+# Generar un session_id único si no existe ya en session_state
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())  # Genera un UUID único para la sesión
+
+# Obtener el session_id de la sesión actual
+session_id = st.session_state.session_id
+
+def enviar_mensaje_a_airtable(contenido, session_id):
     """Envía un mensaje de usuario a Airtable como un nuevo registro con la fecha actual."""
     url = f"https://api.airtable.com/v0/{airtable_base_id}/{airtable_table_name}"
     fecha_actual = datetime.now().strftime("%Y-%m-%d")  # Obtiene la fecha actual en formato YYYY-MM-DD
     payload = {
         "fields": {
-            "Preguntas": contenido,  # Reemplaza "Pregunta" con el nombre de la columna en tu tabla
-            "Fecha": fecha_actual   # Reemplaza "Fecha" con el nombre de la columna de fecha en tu tabla
+            "Preguntas": contenido,       # Reemplaza "Preguntas" con el nombre de la columna en tu tabla
+            "Fecha": fecha_actual,        # Reemplaza "Fecha" con el nombre de la columna de fecha en tu tabla
+            "session_id": session_id      # Asegúrate de que el nombre del campo en Airtable sea "Session ID"
         }
     }
     response = requests.post(url, headers=headers, json=payload)
@@ -69,15 +67,13 @@ if selected_tab == "Reportes":
         records = [record['fields'] for record in data.get('records', [])]
         if records:
             df = pd.DataFrame(records)
-            # st.write("Reportes:")
             st.metric(label="Cantidad de preguntas", value=df.shape[0])
-            st.dataframe(df.sort_values(by=['Fecha'], ascending=False).reset_index(drop=True), use_container_width=True)
-
+            st.metric(label="Cantidad de sesiones", value=df['session_id'].nunique())
+            st.dataframe(df[['Preguntas', 'Fecha']].sort_values(by=['Fecha'], ascending=False).reset_index(drop=True), use_container_width=True)
 
             st.header("Preguntas por fecha", divider="gray")
 
             df_fecha = df.groupby("Fecha").size().reset_index(name="Cantidad de Preguntas")
-
             st.bar_chart(df_fecha, x="Fecha", y="Cantidad de Preguntas")
 
         else:
@@ -105,12 +101,9 @@ if selected_tab == "Sofía Chat":
     if prompt := st.chat_input("¿En qué puedo ayudarte?"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         
-        # Enviar el mensaje a Airtable
-        enviar_mensaje_a_airtable(prompt)
-
         
         with st.chat_message("user"):
-            st.markdown(prompt)        
+            st.markdown(prompt)
 
         # Start interaction with the assistant
         with st.chat_message("assistant", avatar=avatar_image):
@@ -126,6 +119,9 @@ if selected_tab == "Sofía Chat":
                 assistant_id=assistant.id,
             )
 
+            # Enviar el mensaje a Airtable con el session_id único
+            enviar_mensaje_a_airtable(prompt, session_id)
+
             # Show initial status and wait for completion
             with st.spinner("Assistant is generating a response..."):
                 time.sleep(5)
@@ -134,6 +130,7 @@ if selected_tab == "Sofía Chat":
                 run = openai_client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
                 full_response = openai_client.beta.threads.messages.list(thread_id=thread.id).data[0].content[0].text.value
                 message_placeholder.markdown(full_response)
+                
         
         # Add assistant's response to message history
         st.session_state.messages.append({"role": "assistant", "content": full_response})
