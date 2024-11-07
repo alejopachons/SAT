@@ -86,6 +86,10 @@ if selected_tab == "Reportes":
         st.error(f"Failed to retrieve data: {response.status_code}")
 
 # Initialize message history with a welcoming message if not already set
+
+# Ruta de la imagen de avatar
+avatar_image = "img/iconoSofia.png"
+
 if selected_tab == "Sofía Chat":
     if "messages" not in st.session_state:
         st.session_state.messages = [
@@ -94,7 +98,7 @@ if selected_tab == "Sofía Chat":
 
     # Display the message history
     for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
+        with st.chat_message(message["role"], avatar=avatar_image):
             st.markdown(message["content"])
 
     # Handle user input
@@ -104,8 +108,6 @@ if selected_tab == "Sofía Chat":
         # Enviar el mensaje a Airtable
         enviar_mensaje_a_airtable(prompt)
 
-        # Ruta de la imagen de avatar
-        avatar_image = "img/iconoSofia.png"
         
         with st.chat_message("user"):
             st.markdown(prompt)        
