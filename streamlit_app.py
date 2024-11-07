@@ -103,12 +103,15 @@ if selected_tab == "Sofía Chat":
         
         # Enviar el mensaje a Airtable
         enviar_mensaje_a_airtable(prompt)
+
+        # Ruta de la imagen de avatar
+        avatar_image = "img/iconoSofia.png"
         
         with st.chat_message("user"):
-            st.markdown(prompt)
-        
+            st.markdown(prompt)        
+
         # Start interaction with the assistant
-        with st.chat_message("assistant"):
+        with st.chat_message("assistant", avatar=avatar_image):
             message_placeholder = st.empty()
             
             # Create thread and run with assistant
