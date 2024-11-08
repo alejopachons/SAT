@@ -7,6 +7,13 @@ from datetime import datetime  # Importa datetime para obtener la fecha actual
 import time
 import uuid  # Para generar un session_id único
 
+import json
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+
+# Ruta de la imagen de avatar
+avatar_image = "img/iconoSofia.png"
+
 # Set up the OpenAI client
 openai.api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
 
@@ -17,7 +24,7 @@ assistant = openai_client.beta.assistants.retrieve(assistant_id)
 
 # Sidebar configuration for OpenAI API Key and Reportes
 with st.sidebar:
-    st.title('🤖💬 Sofía Chatbot')
+    st.title('Sofía Chatbot')
     selected_tab = st.radio("Menú:", ["Sofía Chat", "Reportes"])
 
 # Airtable configuration
@@ -68,12 +75,12 @@ if selected_tab == "Reportes":
         if records:
             df = pd.DataFrame(records)
             # Crear dos columnas para organizar las métricas lado a lado
-            col1, col2 = st.columns([1, 1])  # Las proporciones pueden ajustarse para modificar el tamaño de cada columna
+            col1, col2 = st.columns([1, 1])
 
             col1.metric(label="Cantidad de sesiones", value=df['session_id'].nunique())
             col2.metric(label="Cantidad de preguntas", value=df.shape[0])
 
-            st.dataframe(df[['Preguntas', 'Fecha']].sort_values(by=['Fecha'], ascending=False).reset_index(drop=True), use_container_width=True, hide_index=True, height = 220)
+            st.dataframe(df[['Preguntas', 'Fecha']].sort_values(by=['Fecha'], ascending=False).reset_index(drop=True), use_container_width=True, hide_index=True, height=220)
 
             st.header("Sesiones y Preguntas por fecha", divider="gray")
 
@@ -87,15 +94,28 @@ if selected_tab == "Reportes":
             # Graficar ambas métricas en un solo gráfico de líneas
             st.line_chart(df_combined.set_index("Fecha"))
 
+            # Generar la nube de palabras
+            st.header("Nube de Palabras de Preguntas", divider="gray")
+            
+            # Concatenar todas las preguntas en un solo texto
+            texto = " ".join(df['Preguntas'].dropna())
+
+            # Crear la nube de palabras
+            wordcloud = WordCloud(width=800, height=400, background_color="white").generate(texto)
+
+            # Mostrar la nube de palabras
+            fig, ax = plt.subplots()
+            ax.imshow(wordcloud, interpolation="bilinear")
+            ax.axis("off")
+
+            st.pyplot(fig)
         else:
             st.warning("No records found in Airtable.")
     else:
         st.error(f"Failed to retrieve data: {response.status_code}")
 
-# Initialize message history with a welcoming message if not already set
 
-# Ruta de la imagen de avatar
-avatar_image = "img/iconoSofia.png"
+# Initialize message history with a welcoming message if not already set
 
 if selected_tab == "Sofía Chat":
     if "messages" not in st.session_state:
