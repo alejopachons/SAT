@@ -24,6 +24,7 @@ assistant = openai_client.beta.assistants.retrieve(assistant_id)
 
 # Sidebar configuration for OpenAI API Key and Reportes
 with st.sidebar:
+    st.sidebar.image("img/logo.png", use_column_width=True)
     st.title('Sofía Chatbot')
     selected_tab = st.radio("Menú:", ["Sofía Chat", "Reportes"])
 
@@ -176,7 +177,6 @@ if selected_tab == "Reportes":
             st.warning("No records found in Airtable.")
     else:
         st.error(f"Failed to retrieve data: {response.status_code}")
-
 
 # Initialize message history with a welcoming message if not already set
 
