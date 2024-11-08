@@ -217,7 +217,7 @@ if selected_tab == "Sofía Chat":
             enviar_mensaje_a_airtable(prompt, session_id)
 
             # Show initial status and wait for completion
-            with st.spinner("Assistant is generating a response..."):
+            with st.spinner("Generando respuesta..."):
                 time.sleep(5)
 
                 # Retrieve the completed run and display the response
