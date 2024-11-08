@@ -76,10 +76,11 @@ if selected_tab == "Reportes":
         if records:
             df = pd.DataFrame(records)
             # Crear dos columnas para organizar las métricas lado a lado
-            col1, col2 = st.columns([1, 1])
+            col1, col2 ,col3= st.columns([1, 1, 1])
 
             col1.metric(label="Cantidad de sesiones", value=df['session_id'].nunique())
             col2.metric(label="Cantidad de preguntas", value=df.shape[0])
+            col3.metric(label="AVG preguntas por sesion", value=round(df.shape[0] / df['session_id'].nunique(),1))
 
             st.dataframe(df[['Preguntas', 'Fecha']].sort_values(by=['Fecha'], ascending=False).reset_index(drop=True), use_container_width=True, hide_index=True, height=220)
 
