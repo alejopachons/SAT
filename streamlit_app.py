@@ -127,48 +127,48 @@ if selected_tab == "Reportes":
 
             st.pyplot(fig)
 
-            # Enviar las preguntas a OpenAI para obtener el top 5
             st.header("Top 5 Preguntas Más Frecuentes", divider="gray")
-            preguntas = "\n".join(df['Preguntas'].dropna())
+            
+            # Botón para ver las preguntas
+            if st.button("Ver preguntas"):
 
-            # Crear el prompt para OpenAI
-            prompt = f"Estas son las preguntas enviadas:\n\n{preguntas}\n\nPor favor, dame el top 5 de las preguntas más comunes basadas en su frecuencia y su respectiva frecuencia. el formato de respuesta debe ser pregunta||cantidad. no agregue lista numerada a las preguntas"
+                # Enviar las preguntas a OpenAI para obtener el top 5
+                preguntas = "\n".join(df['Preguntas'].dropna())
 
-            completion = openai_client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "Eres un asistente que analiza datos de preguntas."},
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-                temperature=0,  # Hacer la salida más determinista
-                top_p=0.1       # Restringir el espacio de respuesta a las opciones más probables
+                # Crear el prompt para OpenAI
+                prompt = f"Estas son las preguntas enviadas:\n\n{preguntas}\n\nPor favor, dame el top 5 de las preguntas más comunes basadas en su frecuencia y su respectiva frecuencia. el formato de respuesta debe ser pregunta||cantidad. no agregue lista numerada a las preguntas"
 
-            )
+                completion = openai_client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "Eres un asistente que analiza datos de preguntas."},
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    temperature=0,  # Hacer la salida más determinista
+                    top_p=0.1       # Restringir el espacio de respuesta a las opciones más probables
 
-            # st.write(completion.choices[0].message) 
+                )
 
-            # Extraer el contenido de la respuesta
-            content = completion.choices[0].message.content
+                # Extraer el contenido de la respuesta
+                content = completion.choices[0].message.content
 
-            # Procesar cada línea para obtener pregunta y cantidad, separadas por '||'
-            preguntas_data = []
-            for line in content.split("\n"):
-                parts = line.split("||")
-                if len(parts) == 2:
-                    pregunta = parts[0].strip()
-                    cantidad = parts[1].strip()
-                    preguntas_data.append({"Pregunta": pregunta, "Cantidad": cantidad})
+                # Procesar cada línea para obtener pregunta y cantidad, separadas por '||'
+                preguntas_data = []
+                for line in content.split("\n"):
+                    parts = line.split("||")
+                    if len(parts) == 2:
+                        pregunta = parts[0].strip()
+                        cantidad = parts[1].strip()
+                        preguntas_data.append({"Pregunta": pregunta, "Cantidad": cantidad})
 
-            # Crear el DataFrame con dos columnas: Pregunta y Cantidad
-            df_top_5 = pd.DataFrame(preguntas_data)
+                # Crear el DataFrame con dos columnas: Pregunta y Cantidad
+                df_top_5 = pd.DataFrame(preguntas_data)
 
-            # Mostrar el DataFrame en Streamlit
-            # st.write(df_top_5, hide_index=True)
-            st.dataframe(df_top_5.sort_values(by=['Cantidad'], ascending=False), use_container_width=True, hide_index=True)
-
+                # Mostrar el DataFrame en Streamlit
+                st.dataframe(df_top_5.sort_values(by=['Cantidad'], ascending=False), use_container_width=True, hide_index=True)
 
 
 
